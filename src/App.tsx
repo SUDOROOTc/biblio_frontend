@@ -78,7 +78,7 @@ function App() {
             <div className="preview-topbar"><span className="preview-brand"><span className="preview-mark">B</span> Biblio</span><span className="preview-avatar">AM</span></div>
             <div className="preview-body">
               <p className="preview-kicker">SAMEDI 1 NOVEMBRE 2026</p>
-              <h2>Bonjour, Alex</h2>
+              <h2>Bonjour, Ouedraogoe</h2>
               <div className="preview-stats"><span><b>1 248</b><small>Livres</small></span><span><b>86</b><small>Emprunts</small></span><span><b>12</b><small>Retards</small></span></div>
               <div className="preview-list"><div><span className="preview-book book-one">LE</span><span><b>L’Étranger</b><small>Albert Camus</small></span><i>Disponible</i></div><div><span className="preview-book book-two">UC</span><span><b>Une chambre à soi</b><small>Virginia Woolf</small></span><i className="preview-borrowed">Emprunté</i></div></div>
             </div>
