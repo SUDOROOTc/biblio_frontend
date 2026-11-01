@@ -12,13 +12,13 @@ type Props = {
 
 export function AppLayout({ screen, utilisateur, navigate, onLogout, children }: Props) {
   const [theme, setTheme] = useState<'clair' | 'sombre'>(() => {
-    const savedTheme = window.localStorage.getItem('biblio-theme')
-    return savedTheme === 'clair' ? 'clair' : 'sombre'
+    const savedTheme = window.localStorage.getItem('biblio-theme-v2')
+    return savedTheme === 'sombre' ? 'sombre' : 'clair'
   })
   const initials = utilisateur?.username.slice(0, 2).toUpperCase() ?? 'OU'
   useEffect(() => {
     document.documentElement.dataset.theme = theme
-    window.localStorage.setItem('biblio-theme', theme)
+    window.localStorage.setItem('biblio-theme-v2', theme)
   }, [theme])
   const link = (target: Screen, label: string, icon: 'grid' | 'book' | 'users' | 'settings') => (
     <a className={`nav-item ${screen === target || (target === 'catalogue' && screen === 'catalogue-nouveau') || (target === 'reservations' && screen === 'reservations-nouveau') ? 'active' : ''}`} href={`/${target}`} onClick={(event) => { event.preventDefault(); navigate(target) }}>

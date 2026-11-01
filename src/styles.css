@@ -229,5 +229,20 @@ footer { color: var(--biblio-text-muted); }
 [data-theme='sombre'] .sidebar .nav-item:hover,
 [data-theme='sombre'] .sidebar .nav-item.active { background: #234b34; }
 [data-theme='sombre'] .success-banner { color: #b8e3c2; background: #1d3b2b; border-color: #397455; }
+[data-theme='clair'] {
+  --biblio-primary: #294536;
+  --biblio-surface: #fffdf8;
+  --biblio-background: #f3f0e8;
+  --biblio-background-muted: #ebe8df;
+  --biblio-text-muted: #66766b;
+  --biblio-border: #d7ded4;
+  --biblio-sage: #47745a;
+  --biblio-amber: #9a6a2b;
+}
+[data-theme='clair'] body,
+[data-theme='clair'] .public-shell,
+[data-theme='clair'] .auth-shell { background: var(--biblio-background); }
+[data-theme='clair'] .main-content,
+[data-theme='clair'] .app-shell { background: var(--biblio-background); }
 [data-theme='clair'] .theme-toggle { color: #1b382b; background: #e8f1e9; border-color: #b9d1bc; }
 [data-theme='clair'] .theme-toggle:hover { background: #dcebdd; }
