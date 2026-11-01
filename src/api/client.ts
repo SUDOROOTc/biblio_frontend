@@ -101,8 +101,10 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
   if (response.status === 204) return undefined as T
   const contentType = response.headers.get('content-type') ?? ''
+  const body = await response.text()
+  if (!body.trim()) return undefined as T
   if (!contentType.includes('application/json')) {
     throw new ErreurApi('Le serveur a renvoyé une réponse inattendue.', response.status)
   }
-  return response.json() as Promise<T>
+  return JSON.parse(body) as T
 }
