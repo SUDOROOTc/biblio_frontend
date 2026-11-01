@@ -1,13 +1,27 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { getBooks, getStats } from './api'
-import type { Book, LibraryStats } from './types'
+import type { Book, LibraryStats, ReservationStatus } from './types'
 
 const fallbackStats: LibraryStats = { totalBooks: 1248, borrowedBooks: 86, members: 324, overdueBooks: 12 }
 const recentReservations = [
-  { reader: 'Camille Durand', book: 'L’Étranger', status: 'Réservée', time: 'Il y a 12 min' },
-  { reader: 'Thomas Bernard', book: 'Une chambre à soi', status: 'Empruntée', time: 'Il y a 34 min' },
-  { reader: 'Nina Morel', book: 'Le Petit Prince', status: 'Retournée', time: 'Hier, 16:42' },
+  { reader: 'Camille Durand', book: 'L’Étranger', status: 'RESERVEE' as const, time: 'Il y a 12 min' },
+  { reader: 'Thomas Bernard', book: 'Une chambre à soi', status: 'EMPRUNTEE' as const, time: 'Il y a 34 min' },
+  { reader: 'Nina Morel', book: 'Le Petit Prince', status: 'RETOURNEE' as const, time: 'Hier, 16:42' },
 ]
+const reservationStatusLabels: Record<ReservationStatus, string> = {
+  RESERVEE: 'Réservée',
+  EMPRUNTEE: 'Empruntée',
+  RETOURNEE: 'Retournée',
+  ANNULEE: 'Annulée',
+  EXPIREE: 'Expirée',
+}
+const reservationStatusClasses: Record<ReservationStatus, string> = {
+  RESERVEE: 'status-reservee',
+  EMPRUNTEE: 'status-empruntee',
+  RETOURNEE: 'status-retournee',
+  ANNULEE: 'status-annulee',
+  EXPIREE: 'status-expiree',
+}
 
 function Icon({ name }: { name: 'grid' | 'book' | 'users' | 'settings' | 'search' | 'bell' | 'arrow' | 'plus' | 'refresh' }) {
   const paths = {
@@ -167,7 +181,7 @@ function App() {
         </header>
         <div className="content">
           <section className="welcome"><div><p className="eyebrow">SAMEDI 1 NOVEMBRE 2026</p><h1>Bonjour, Alex <span>✦</span></h1><p className="subtitle">Voici ce qui se passe dans votre bibliothèque aujourd’hui.</p></div><button className="primary-button"><Icon name="plus" /> Ajouter un livre</button></section>
-          {error && <div className="error-banner"><span>{error}. Vérifiez la connexion à votre API.</span><button onClick={() => void loadData()}><Icon name="refresh" /> Réessayer</button></div>}
+          {error && <div className="error-banner" role="alert" aria-live="polite"><span>{error}. Vérifiez la connexion à votre API.</span><button onClick={() => void loadData()}><Icon name="refresh" /> Réessayer</button></div>}
           <section className="stats-grid">{statCards.map((card) => <article className="stat-card" key={card.label}><div className={`stat-icon ${card.tone}`}><Icon name={card.tone === 'blue' ? 'users' : card.tone === 'orange' ? 'book' : card.tone === 'red' ? 'bell' : 'grid'} /></div><div><p>{card.label}</p><strong>{loading ? '—' : card.value}</strong><small className={card.tone === 'red' ? 'warning' : ''}>{card.detail}</small></div></article>)}</section>
           <section className="quick-actions">
             <div><p className="section-kicker">ACTIONS RAPIDES</p><h2>Que souhaitez-vous faire ?</h2></div>
@@ -176,7 +190,7 @@ function App() {
           <section className="section-heading"><div><h2>Catalogue récent</h2><p>Les derniers livres ajoutés à votre bibliothèque</p></div><a href="#books">Voir tout <Icon name="arrow" /></a></section>
           <section className="table-card"><div className="table-header"><div className="table-title"><span className="green-dot" /> Livres disponibles <b>{books.filter((book) => book.status === 'Disponible').length || '—'}</b></div><button className="filter-button">Tous les statuts <span>⌄</span></button></div>{loading ? <div className="empty-state">Chargement du catalogue...</div> : filteredBooks.length === 0 ? <div className="empty-state">Aucun livre trouvé.</div> : <div className="table-wrap"><table><thead><tr><th>LIVRE</th><th>AUTEUR</th><th>CATÉGORIE</th><th>ANNÉE</th><th>STATUT</th><th /></tr></thead><tbody>{filteredBooks.map((book) => <tr key={book.id}><td><div className="book-cell"><span className={`book-cover cover-${book.cover.toLowerCase()}`}>{book.cover}</span><strong>{book.title}</strong></div></td><td>{book.author}</td><td><span className="category">{book.category}</span></td><td>{book.year < 0 ? `${Math.abs(book.year)} av. J.-C.` : book.year}</td><td><span className={`status ${book.status === 'Disponible' ? 'available' : 'borrowed'}`}><i />{book.status}</span></td><td><button className="more-button" aria-label={`Options pour ${book.title}`}>•••</button></td></tr>)}</tbody></table></div>}</section>
           <section className="section-heading reservation-heading"><div><h2>Réservations récentes</h2><p>Les dernières activités de circulation</p></div><a href="#reservations">Voir tout <Icon name="arrow" /></a></section>
-          <section className="reservation-card">{recentReservations.map((reservation) => <article key={`${reservation.reader}-${reservation.book}`}><div className="reservation-avatar">{reservation.reader.split(' ').map((part) => part[0]).join('')}</div><div className="reservation-info"><b>{reservation.reader}</b><span>{reservation.book}</span></div><span className={`reservation-status status-${reservation.status.toLowerCase()}`}>{reservation.status}</span><time>{reservation.time}</time></article>)}</section>
+          <section className="reservation-card" aria-label="Réservations récentes">{recentReservations.map((reservation) => <article key={`${reservation.reader}-${reservation.book}`}><div className="reservation-avatar">{reservation.reader.split(' ').map((part) => part[0]).join('')}</div><div className="reservation-info"><b>{reservation.reader}</b><span>{reservation.book}</span></div><span className={`reservation-status ${reservationStatusClasses[reservation.status]}`}>{reservationStatusLabels[reservation.status]}</span><time>{reservation.time}</time></article>)}</section>
           <footer><span>© 2026 Biblio</span><span><i className="secure-dot" /> Données synchronisées</span></footer>
         </div>
       </main>
