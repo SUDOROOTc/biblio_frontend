@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { connecter } from './api/auth'
 import { DashboardContent } from './DashboardContent'
 import { Icon } from './Icon'
 
@@ -20,10 +21,13 @@ function App() {
     }
 
     setLoginLoading(true)
-    window.setTimeout(() => {
-      setLoginLoading(false)
+    void connecter(username, password).then(() => {
       setScreen('dashboard')
-    }, 350)
+    }).catch((requestError: unknown) => {
+      setLoginError(requestError instanceof Error ? requestError.message : 'La connexion a échoué.')
+    }).finally(() => {
+      setLoginLoading(false)
+    })
   }
 
   if (screen === 'landing') {
