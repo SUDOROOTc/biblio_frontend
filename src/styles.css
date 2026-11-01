@@ -37,6 +37,8 @@ button { cursor: pointer; }
 .public-nav .brand, .auth-brand { padding: 0; color: var(--biblio-primary); }
 .public-nav .brand-mark, .auth-brand .brand-mark { color: var(--biblio-background); background: var(--biblio-primary); }
 .public-links { display: flex; align-items: center; gap: 25px; }.public-links a { color: var(--biblio-text-muted); font-size: 12px; text-decoration: none; }.public-links .text-button { margin: 0; color: var(--biblio-primary); font-weight: 600; }
+.public-theme-toggle { display: inline-flex; align-items: center; gap: 6px; padding: 8px 10px; color: var(--biblio-primary); background: var(--biblio-surface); border: 1px solid var(--biblio-border); border-radius: var(--biblio-radius-sm); font-size: 11px; }
+.public-theme-toggle:hover { background: var(--biblio-background-muted); }
 .public-hero { max-width: 1180px; margin: auto; padding: 10vh 5% 9vh; }
 .product-hero { display: grid; grid-template-columns: minmax(0, .9fr) minmax(400px, 1.1fr); align-items: center; gap: 8%; }
 .public-hero h1 { max-width: 570px; margin: 16px 0; color: var(--biblio-primary); font-family: 'Newsreader', Georgia, serif; font-size: clamp(42px, 5vw, 70px); line-height: 1.02; letter-spacing: -.04em; }
