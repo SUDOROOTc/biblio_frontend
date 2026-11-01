@@ -19,7 +19,7 @@ export async function connecter(username: string, password: string): Promise<voi
   const response = await fetch(`${API_URL}/api/auth/login/`, {
     method: 'POST',
     credentials: 'include',
-    redirect: 'follow',
+    redirect: 'manual',
     headers: {
       Accept: 'text/html',
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -29,7 +29,8 @@ export async function connecter(username: string, password: string): Promise<voi
     body: formulaire,
   })
 
-  if (!response.ok || response.url.endsWith('/api/auth/login/')) {
+  const connexionAcceptee = response.status >= 300 && response.status < 400
+  if (!connexionAcceptee) {
     throw new Error('Identifiant ou mot de passe incorrect.')
   }
 }
