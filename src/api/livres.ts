@@ -38,7 +38,7 @@ function convertirLivre(livre: LivreResponse): Book {
 }
 
 export async function rechercherLivres(query: string): Promise<{ books: Book[]; count: number }> {
-  if (!import.meta.env.VITE_API_URL) {
+  if (import.meta.env.VITE_USE_DEMO === 'true') {
     const normalizedQuery = query.trim().toLowerCase()
     const books = demoBooks.filter((book) =>
       `${book.title} ${book.author} ${book.category}`.toLowerCase().includes(normalizedQuery),

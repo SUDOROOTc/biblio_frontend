@@ -1,14 +1,16 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { ErreurApi } from './api/client'
 import { obtenirUtilisateurConnecte, seConnecter, seDeconnecter } from './api/auth'
+import { CataloguePage } from './CataloguePage'
 import { DashboardContent } from './DashboardContent'
 import { Icon } from './Icon'
 import type { UtilisateurConnecte } from './types'
 
-type Screen = 'dashboard' | 'landing' | 'login'
+type Screen = 'dashboard' | 'landing' | 'login' | 'catalogue'
 
 function screenFromPath(pathname: string): Screen {
   if (pathname === '/connexion') return 'login'
+  if (pathname === '/catalogue') return 'catalogue'
   if (pathname === '/dashboard') return 'dashboard'
   return 'landing'
 }
@@ -25,6 +27,7 @@ function App() {
       landing: '/',
       login: '/connexion',
       dashboard: '/dashboard',
+      catalogue: '/catalogue',
     }
     const method = replace ? 'replaceState' : 'pushState'
     window.history[method]({}, '', pathByScreen[nextScreen])
@@ -43,7 +46,7 @@ function App() {
       if (screen === 'login') navigate('dashboard', true)
     }).catch((requestError: unknown) => {
       setUtilisateur(null)
-      if (requestError instanceof ErreurApi && requestError.status === 401 && screen === 'dashboard') {
+      if (requestError instanceof ErreurApi && requestError.status === 401 && (screen === 'dashboard' || screen === 'catalogue')) {
         navigate('login', true)
       }
     }).finally(() => {
@@ -150,6 +153,26 @@ function App() {
     )
   }
 
+  if (screen === 'catalogue') {
+    return (
+      <div className="app-shell">
+        <aside className="sidebar">
+          <div className="brand"><span className="brand-mark">B</span><span>Biblio</span></div>
+          <div className="menu-label">MENU PRINCIPAL</div>
+          <nav>
+            <a className="nav-item" href="/dashboard" onClick={(event) => { event.preventDefault(); navigate('dashboard') }}><Icon name="grid" /> Tableau de bord</a>
+            <a className="nav-item active" href="/catalogue" onClick={(event) => { event.preventDefault(); navigate('catalogue') }}><Icon name="book" /> Catalogue</a>
+            <a className="nav-item" href="#members"><Icon name="users" /> Membres</a>
+          </nav>
+          <div className="menu-label menu-label-bottom">CONFIGURATION</div>
+          <nav><a className="nav-item" href="#settings"><Icon name="settings" /> Paramètres</a></nav>
+          <div className="sidebar-footer"><div className="profile"><div className="avatar">OU</div><div><strong>{utilisateur?.username ?? 'Ouedraogo'}</strong><small>{utilisateur?.role ?? 'Bibliothécaire'}</small></div></div><button className="text-button" onClick={handleLogout}>Se déconnecter</button></div>
+        </aside>
+        <main className="main-content"><CataloguePage /></main>
+      </div>
+    )
+  }
+
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -157,7 +180,7 @@ function App() {
         <div className="menu-label">MENU PRINCIPAL</div>
         <nav>
           <a className="nav-item active" href="/dashboard" onClick={(event) => { event.preventDefault(); navigate('dashboard') }}><Icon name="grid" /> Tableau de bord</a>
-          <a className="nav-item" href="#books"><Icon name="book" /> Catalogue <span className="nav-count">1 248</span></a>
+          <a className="nav-item" href="/catalogue" onClick={(event) => { event.preventDefault(); navigate('catalogue') }}><Icon name="book" /> Catalogue <span className="nav-count">1 248</span></a>
           <a className="nav-item" href="#members"><Icon name="users" /> Membres</a>
         </nav>
         <div className="menu-label menu-label-bottom">CONFIGURATION</div>
