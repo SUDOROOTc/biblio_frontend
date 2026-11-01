@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { getBooks, getStats } from './api'
 import type { Book, LibraryStats } from './types'
 
@@ -26,6 +26,8 @@ function App() {
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [loginLoading, setLoginLoading] = useState(false)
+  const [loginError, setLoginError] = useState('')
 
   const loadData = async () => {
     setLoading(true)
@@ -54,6 +56,25 @@ function App() {
     { label: 'Membres actifs', value: stats.members, detail: '+ 12 ce mois', tone: 'blue' },
     { label: 'Retards', value: stats.overdueBooks, detail: 'À vérifier rapidement', tone: 'red' },
   ]
+
+  const handleLogin = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setLoginError('')
+    const formData = new FormData(event.currentTarget)
+    const username = String(formData.get('username') ?? '').trim()
+    const password = String(formData.get('password') ?? '')
+
+    if (!username || !password) {
+      setLoginError('Renseignez votre identifiant et votre mot de passe.')
+      return
+    }
+
+    setLoginLoading(true)
+    window.setTimeout(() => {
+      setLoginLoading(false)
+      setScreen('dashboard')
+    }, 350)
+  }
 
   if (screen === 'landing') {
     return (
@@ -103,12 +124,13 @@ function App() {
           <p className="eyebrow">ESPACE BIBLIOTHÉCAIRE</p>
           <h1>Bienvenue dans votre bibliothèque.</h1>
           <p className="subtitle">Connectez-vous pour retrouver votre tableau de bord.</p>
-          <form onSubmit={(event) => { event.preventDefault(); setScreen('dashboard') }}>
+          {loginError && <p className="form-error" role="alert">{loginError}</p>}
+          <form onSubmit={handleLogin}>
             <label htmlFor="username">Identifiant</label>
             <input id="username" name="username" autoComplete="username" required />
             <label htmlFor="password">Mot de passe</label>
             <input id="password" name="password" type="password" autoComplete="current-password" required />
-            <button className="primary-button auth-submit" type="submit">Se connecter</button>
+            <button className="primary-button auth-submit" type="submit" disabled={loginLoading}>{loginLoading ? 'Connexion en cours…' : 'Se connecter'}</button>
           </form>
           <button className="text-button" onClick={() => setScreen('landing')}>Retour à l’accueil</button>
         </section>
