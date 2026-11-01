@@ -59,7 +59,6 @@ export function DashboardContent({ navigate }: DashboardProps) {
     { label: 'Livres au total', value: stats.totalBooks.toLocaleString('fr-FR'), detail: '+ 8 ce mois', tone: 'purple' },
     { label: 'Emprunts en cours', value: reservations.filter((reservation) => reservation.statut === 'EMPRUNTEE').length.toLocaleString('fr-FR'), detail: 'Selon les réservations', tone: 'orange' },
     { label: 'Membres actifs', value: membersCount === null ? '—' : membersCount.toLocaleString('fr-FR'), detail: 'Lecteurs enregistrés', tone: 'blue' },
-    { label: 'Retards', value: '—', detail: 'Donnée API à venir', tone: 'red' },
   ]
 
   return (
@@ -71,7 +70,7 @@ export function DashboardContent({ navigate }: DashboardProps) {
       <div className="content">
         <section className="welcome"><div><p className="eyebrow">SAMEDI 1 NOVEMBRE 2026</p><h1>Bonjour, Ouedraogo <span>✦</span></h1><p className="subtitle">Voici ce qui se passe dans votre bibliothèque aujourd’hui.</p></div><button className="primary-button" onClick={() => navigate('catalogue-nouveau')}><Icon name="plus" /> Ajouter un livre</button></section>
         {error && <div className="error-banner" role="alert" aria-live="polite"><span>{error}. Vérifiez la connexion à votre API.</span><button onClick={() => void loadData()}><Icon name="refresh" /> Réessayer</button></div>}
-        <section className="stats-grid">{statCards.map((card) => <article className="stat-card" key={card.label}><div className={`stat-icon ${card.tone}`}><Icon name={card.tone === 'blue' ? 'users' : card.tone === 'orange' ? 'book' : card.tone === 'red' ? 'bell' : 'grid'} /></div><div><p>{card.label}</p><strong>{loading ? '—' : card.value}</strong><small className={card.tone === 'red' ? 'warning' : ''}>{card.detail}</small></div></article>)}</section>
+        <section className="stats-grid">{statCards.map((card) => <article className="stat-card" key={card.label}><div className={`stat-icon ${card.tone}`}><Icon name={card.tone === 'blue' ? 'users' : 'book'} /></div><div><p>{card.label}</p><strong>{loading ? '—' : card.value}</strong><small>{card.detail}</small></div></article>)}</section>
         <section className="quick-actions">
           <div><p className="section-kicker">ACTIONS RAPIDES</p><h2>Que souhaitez-vous faire ?</h2></div>
           <div className="quick-action-list"><button onClick={() => navigate('catalogue-nouveau')}><Icon name="plus" /><span><b>Ajouter un livre</b><small>Enrichir le catalogue</small></span><Icon name="arrow" /></button><button onClick={() => navigate('membres')}><Icon name="users" /><span><b>Ajouter un lecteur</b><small>Créer une fiche adhérent</small></span><Icon name="arrow" /></button><button onClick={() => navigate('reservations-nouveau')}><Icon name="book" /><span><b>Créer une réservation</b><small>Préparer un retrait</small></span><Icon name="arrow" /></button></div>
