@@ -13,3 +13,9 @@ export type LibraryStats = {
 }
 
 export type ReservationStatus = 'RESERVEE' | 'EMPRUNTEE' | 'RETOURNEE' | 'ANNULEE' | 'EXPIREE'
+
+export type UtilisateurConnecte = {
+  username: string
+  email: string
+  role: string
+}

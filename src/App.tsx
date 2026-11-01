@@ -1,7 +1,9 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { connecter } from './api/auth'
+import { ErreurApi } from './api/client'
+import { obtenirUtilisateurConnecte, seConnecter, seDeconnecter } from './api/auth'
 import { DashboardContent } from './DashboardContent'
 import { Icon } from './Icon'
+import type { UtilisateurConnecte } from './types'
 
 type Screen = 'dashboard' | 'landing' | 'login'
 
@@ -15,6 +17,19 @@ function App() {
   const [screen, setScreen] = useState<Screen>(() => screenFromPath(window.location.pathname))
   const [loginLoading, setLoginLoading] = useState(false)
   const [loginError, setLoginError] = useState('')
+  const [utilisateur, setUtilisateur] = useState<UtilisateurConnecte | null>(null)
+  const [sessionLoading, setSessionLoading] = useState(true)
+
+  const navigate = (nextScreen: Screen, replace = false) => {
+    const pathByScreen: Record<Screen, string> = {
+      landing: '/',
+      login: '/connexion',
+      dashboard: '/dashboard',
+    }
+    const method = replace ? 'replaceState' : 'pushState'
+    window.history[method]({}, '', pathByScreen[nextScreen])
+    setScreen(nextScreen)
+  }
 
   useEffect(() => {
     const handlePopState = () => setScreen(screenFromPath(window.location.pathname))
@@ -22,15 +37,19 @@ function App() {
     return () => window.removeEventListener('popstate', handlePopState)
   }, [])
 
-  const navigate = (nextScreen: Screen) => {
-    const pathByScreen: Record<Screen, string> = {
-      landing: '/',
-      login: '/connexion',
-      dashboard: '/dashboard',
-    }
-    window.history.pushState({}, '', pathByScreen[nextScreen])
-    setScreen(nextScreen)
-  }
+  useEffect(() => {
+    void obtenirUtilisateurConnecte().then((connectedUser) => {
+      setUtilisateur(connectedUser)
+      if (screen === 'login') navigate('dashboard', true)
+    }).catch((requestError: unknown) => {
+      setUtilisateur(null)
+      if (requestError instanceof ErreurApi && requestError.status === 401 && screen === 'dashboard') {
+        navigate('login', true)
+      }
+    }).finally(() => {
+      setSessionLoading(false)
+    })
+  }, [])
 
   const handleLogin = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -45,13 +64,28 @@ function App() {
     }
 
     setLoginLoading(true)
-    void connecter(username, password).then(() => {
+    void seConnecter(username, password).then((connectedUser) => {
+      setUtilisateur(connectedUser)
       navigate('dashboard')
     }).catch((requestError: unknown) => {
       setLoginError(requestError instanceof Error ? requestError.message : 'La connexion a échoué.')
     }).finally(() => {
       setLoginLoading(false)
     })
+  }
+
+  const handleLogout = () => {
+    setLoginError('')
+    void seDeconnecter().then(() => {
+      setUtilisateur(null)
+      navigate('landing')
+    }).catch((requestError: unknown) => {
+      setLoginError(requestError instanceof Error ? requestError.message : 'La déconnexion a échoué.')
+    })
+  }
+
+  if (sessionLoading) {
+    return <main className="auth-shell"><p className="subtitle">Vérification de la session…</p></main>
   }
 
   if (screen === 'landing') {
@@ -129,7 +163,8 @@ function App() {
         <div className="menu-label menu-label-bottom">CONFIGURATION</div>
         <nav><a className="nav-item" href="#settings"><Icon name="settings" /> Paramètres</a></nav>
         <div className="sidebar-footer">
-          <div className="profile"><div className="avatar">AM</div><div><strong>Alex Martin</strong><small>Administrateur</small></div><span className="dots">•••</span></div>
+          <div className="profile"><div className="avatar">OU</div><div><strong>{utilisateur?.username ?? 'Ouedraogo'}</strong><small>{utilisateur?.role ?? 'Bibliothécaire'}</small></div><span className="dots">•••</span></div>
+          <button className="text-button" onClick={handleLogout}>Se déconnecter</button>
         </div>
       </aside>
       <main className="main-content"><DashboardContent /></main>

@@ -23,15 +23,18 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
   if (!response.ok) {
     let message = `La requête a échoué (${response.status})`
-    try {
+    const contentType = response.headers.get('content-type') ?? ''
+    if (contentType.includes('application/json')) {
       const body = await response.json() as { detail?: string }
       if (body.detail) message = body.detail
-    } catch {
-      // Le backend peut répondre sans JSON, le statut reste alors le message utile.
     }
     throw new ErreurApi(message, response.status)
   }
 
   if (response.status === 204) return undefined as T
+  const contentType = response.headers.get('content-type') ?? ''
+  if (!contentType.includes('application/json')) {
+    throw new ErreurApi('Le serveur a renvoyé une réponse inattendue.', response.status)
+  }
   return response.json() as Promise<T>
 }
