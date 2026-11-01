@@ -52,6 +52,13 @@ export async function rechercherLivres(query: string): Promise<{ books: Book[]; 
   return { books: response.results.map(convertirLivre), count: response.count }
 }
 
+export async function creerLivre(titre: string, auteur: string, anneePublication: number): Promise<LivreResponse> {
+  return request<LivreResponse>('/api/livres', {
+    method: 'POST',
+    body: JSON.stringify({ titre, auteur, annee_publication: anneePublication }),
+  })
+}
+
 export async function getBooks(): Promise<Book[]> {
   return (await rechercherLivres('')).books
 }

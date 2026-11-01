@@ -1,1 +1,1 @@
-export { getBooks, rechercherLivres } from './api/livres'
+export { creerLivre, getBooks, rechercherLivres } from './api/livres'

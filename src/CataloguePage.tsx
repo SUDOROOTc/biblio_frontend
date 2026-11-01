@@ -3,7 +3,9 @@ import { rechercherLivres } from './api'
 import { Icon } from './Icon'
 import type { Book } from './types'
 
-export function CataloguePage() {
+type Props = { onAdd: () => void }
+
+export function CataloguePage({ onAdd }: Props) {
   const [books, setBooks] = useState<Book[]>([])
   const [query, setQuery] = useState('')
   const [total, setTotal] = useState(0)
@@ -40,7 +42,7 @@ export function CataloguePage() {
         <div className="top-actions"><form className="search" onSubmit={handleSearch}><Icon name="search" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Rechercher un livre..." aria-label="Rechercher un livre" /></form></div>
       </header>
       <div className="content">
-        <section className="welcome"><div><p className="eyebrow">FONDS DE LA BIBLIOTHÈQUE</p><h1>Le catalogue</h1><p className="subtitle">Retrouvez les ouvrages par titre ou par auteur.</p></div><button className="primary-button"><Icon name="plus" /> Ajouter un livre</button></section>
+        <section className="welcome"><div><p className="eyebrow">FONDS DE LA BIBLIOTHÈQUE</p><h1>Le catalogue</h1><p className="subtitle">Retrouvez les ouvrages par titre ou par auteur.</p></div><button className="primary-button" onClick={onAdd}><Icon name="plus" /> Ajouter un livre</button></section>
         {error && <div className="error-banner" role="alert" aria-live="polite"><span>{error}</span><button onClick={() => void loadBooks()}><Icon name="refresh" /> Réessayer</button></div>}
         <section className="section-heading"><div><h2>{total.toLocaleString('fr-FR')} ouvrage{total > 1 ? 's' : ''}</h2><p>{query ? `Résultats pour « ${query} »` : 'Tous les ouvrages enregistrés'}</p></div></section>
         <section className="table-card" aria-busy={loading}>

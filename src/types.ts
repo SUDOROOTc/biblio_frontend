@@ -19,3 +19,5 @@ export type UtilisateurConnecte = {
   email: string
   role: string
 }
+
+export type Screen = 'dashboard' | 'landing' | 'login' | 'catalogue' | 'catalogue-nouveau' | 'membres' | 'reservations' | 'reservations-nouveau' | 'parametres'
