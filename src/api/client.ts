@@ -1,5 +1,15 @@
 export const API_URL = import.meta.env.VITE_API_URL?.replace(/\/$/, '') ?? ''
 
+export class ErreurApi extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+  ) {
+    super(message)
+    this.name = 'ErreurApi'
+  }
+}
+
 export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, {
     ...init,
@@ -19,7 +29,7 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
     } catch {
       // Le backend peut répondre sans JSON, le statut reste alors le message utile.
     }
-    throw new Error(message)
+    throw new ErreurApi(message, response.status)
   }
 
   if (response.status === 204) return undefined as T

@@ -6,9 +6,12 @@ function lireCookie(nom: string): string | null {
 }
 
 export async function connecter(username: string, password: string): Promise<void> {
-  await fetch(`${API_URL}/api/auth/login/`, {
+  const pageConnexion = await fetch(`${API_URL}/api/auth/login/`, {
     credentials: 'include',
   })
+  if (!pageConnexion.ok) {
+    throw new Error('Le service de connexion est indisponible.')
+  }
 
   const csrfToken = lireCookie('csrftoken')
   if (!csrfToken) {
@@ -30,7 +33,11 @@ export async function connecter(username: string, password: string): Promise<voi
   })
 
   const connexionAcceptee = response.status >= 300 && response.status < 400
-  if (!connexionAcceptee) {
+  if (connexionAcceptee) return
+
+  if (response.status === 200) {
     throw new Error('Identifiant ou mot de passe incorrect.')
   }
+
+  throw new Error(`Le service de connexion a répondu avec le statut ${response.status}.`)
 }
