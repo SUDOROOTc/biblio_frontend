@@ -10,6 +10,15 @@ export class ErreurApi extends Error {
   }
 }
 
+function traduireErreurValidation(message: string): string {
+  const traductions: Record<string, string> = {
+    'This password is too common.': 'Ce mot de passe est trop courant. Choisissez une combinaison moins prévisible.',
+    'This password is entirely numeric.': 'Le mot de passe ne peut pas être composé uniquement de chiffres.',
+    'This password is too short. It must contain at least 8 characters.': 'Le mot de passe doit contenir au moins 8 caractères.',
+  }
+  return traductions[message] ?? message
+}
+
 function lireCookie(nom: string): string | null {
   const cookie = document.cookie.split('; ').find((valeur) => valeur.startsWith(`${nom}=`))
   return cookie ? decodeURIComponent(cookie.substring(nom.length + 1)) : null
@@ -55,10 +64,10 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
     if (contentType.includes('application/json')) {
       const body = await response.json() as Record<string, unknown>
       if (typeof body.detail === 'string') {
-        message = body.detail
+        message = traduireErreurValidation(body.detail)
       } else {
         const validationMessages = Object.values(body).flatMap((value) => Array.isArray(value) ? value : [value]).filter((value): value is string => typeof value === 'string')
-        if (validationMessages.length > 0) message = validationMessages.join(' ')
+        if (validationMessages.length > 0) message = validationMessages.map(traduireErreurValidation).join(' ')
       }
     }
     throw new ErreurApi(message, response.status)
