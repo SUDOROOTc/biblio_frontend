@@ -10,9 +10,6 @@ export type Book = {
 
 export type LibraryStats = {
   totalBooks: number
-  borrowedBooks: number
-  members: number
-  overdueBooks: number
 }
 
 export type ReservationStatus = 'RESERVEE' | 'EMPRUNTEE' | 'RETOURNEE' | 'ANNULEE' | 'EXPIREE'

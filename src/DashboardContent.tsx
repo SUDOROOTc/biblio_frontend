@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
-import { getBooks, getStats } from './api'
+import { rechercherLivres } from './api'
 import { Icon } from './Icon'
 import type { Book, LibraryStats, ReservationStatus } from './types'
 
-const fallbackStats: LibraryStats = { totalBooks: 1248, borrowedBooks: 86, members: 324, overdueBooks: 12 }
 const recentReservations = [
   { reader: 'Camille Durand', book: 'L’Étranger', status: 'RESERVEE' as const, time: 'Il y a 12 min' },
   { reader: 'Thomas Bernard', book: 'Une chambre à soi', status: 'EMPRUNTEE' as const, time: 'Il y a 34 min' },
@@ -27,7 +26,7 @@ const reservationStatusClasses: Record<ReservationStatus, string> = {
 
 export function DashboardContent() {
   const [books, setBooks] = useState<Book[]>([])
-  const [stats, setStats] = useState<LibraryStats>(fallbackStats)
+  const [stats, setStats] = useState<LibraryStats>({ totalBooks: 0 })
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -36,9 +35,9 @@ export function DashboardContent() {
     setLoading(true)
     setError('')
     try {
-      const [bookData, statData] = await Promise.all([getBooks(), getStats()])
-      setBooks(bookData)
-      setStats(statData)
+      const catalogue = await rechercherLivres('')
+      setBooks(catalogue.books)
+      setStats({ totalBooks: catalogue.count })
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : 'Impossible de charger les données')
       setBooks([])
@@ -55,9 +54,9 @@ export function DashboardContent() {
 
   const statCards = [
     { label: 'Livres au total', value: stats.totalBooks.toLocaleString('fr-FR'), detail: '+ 8 ce mois', tone: 'purple' },
-    { label: 'Emprunts en cours', value: stats.borrowedBooks, detail: '3 à retourner bientôt', tone: 'orange' },
-    { label: 'Membres actifs', value: stats.members, detail: '+ 12 ce mois', tone: 'blue' },
-    { label: 'Retards', value: stats.overdueBooks, detail: 'À vérifier rapidement', tone: 'red' },
+    { label: 'Emprunts en cours', value: '—', detail: 'Donnée API à venir', tone: 'orange' },
+    { label: 'Membres actifs', value: '—', detail: 'Donnée API à venir', tone: 'blue' },
+    { label: 'Retards', value: '—', detail: 'Donnée API à venir', tone: 'red' },
   ]
 
   return (
