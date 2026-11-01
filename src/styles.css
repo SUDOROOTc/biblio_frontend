@@ -86,3 +86,42 @@ footer { display: flex; justify-content: space-between; padding: 21px 2px 0; col
 .reservation-heading { margin-top: 34px; }.reservation-card { overflow: hidden; background: var(--biblio-surface); border: 1px solid var(--biblio-border); border-radius: var(--biblio-radius-md); }.reservation-card article { display: flex; align-items: center; gap: 12px; padding: 13px 18px; border-bottom: 1px solid var(--biblio-background-muted); }.reservation-card article:last-child { border-bottom: 0; }.reservation-avatar { display: grid; place-items: center; width: 30px; height: 30px; color: var(--biblio-primary); background: #dce8df; border-radius: 50%; font-size: 9px; font-weight: 700; }.reservation-info { min-width: 190px; }.reservation-info b, .reservation-info span { display: block; }.reservation-info b { color: var(--biblio-primary); font-size: 11px; }.reservation-info span, .reservation-card time { margin-top: 3px; color: var(--biblio-text-muted); font-size: 10px; }.reservation-status { padding: 5px 8px; border-radius: 20px; font-size: 9px; font-weight: 600; }.status-reservee { color: #805818; background: #f9e9c3; }.status-empruntee { color: #286047; background: #dceee2; }.status-retournee { color: #486273; background: #e2edf2; }.status-annulee { color: #71444b; background: #f5e1e2; }.status-expiree { color: #7a3d32; background: #f7ddd2; }.reservation-card time { margin-left: auto; }
 @media (max-width: 900px) { .sidebar { width: 190px; }.main-content { width: calc(100% - 190px); }.stats-grid { grid-template-columns: repeat(2, 1fr); }.content, .topbar { padding-left: 4%; padding-right: 4%; } }
 @media (max-width: 650px) { .sidebar { width: 60px; padding-left: 7px; padding-right: 7px; }.brand { padding: 0 8px 48px; }.brand > span:last-child, .menu-label, .nav-item:not(.active)::after, .nav-item { font-size: 0; }.nav-item { justify-content: center; padding: 0; }.nav-item .icon { width: 18px; height: 18px; }.nav-count, .sidebar-footer { display: none; }.main-content { width: calc(100% - 60px); }.breadcrumb { display: none; }.topbar { justify-content: flex-end; }.search { width: 145px; }.welcome { display: block; }.primary-button { margin-top: 22px; }.stats-grid { grid-template-columns: 1fr; }.content { padding-top: 30px; }.welcome h1 { font-size: 28px; }.public-nav { padding-top: 20px; }.public-links a { display: none; }.product-hero { display: block; padding-top: 8vh; }.public-hero h1 { font-size: 46px; }.hero-actions { display: block; }.secondary-link { display: inline-block; margin: 20px 0 0 4px; }.dashboard-preview { margin-top: 52px; }.feature-strip { grid-template-columns: 1fr; gap: 22px; }.public-footer { display: block; }.public-footer span { display: block; margin-top: 8px; } }
+@media (max-width: 480px) {
+  .sidebar { width: 52px; }
+  .main-content { width: calc(100% - 52px); min-width: 0; }
+  .topbar { height: 62px; padding: 0 16px; }
+  .top-actions, .top-actions .search { width: 100%; }
+  .content { padding: 24px 16px; }
+  .welcome { margin-bottom: 25px; }
+  .welcome h1 { font-size: 25px; }
+  .subtitle { font-size: 12px; line-height: 1.55; }
+  .welcome .primary-button { width: 100%; justify-content: center; }
+  .quick-actions { display: block; padding: 18px; }
+  .quick-actions h2 { font-size: 21px; }
+  .quick-action-list { display: grid; grid-template-columns: 1fr; margin-top: 16px; }
+  .quick-action-list button { width: 100%; }
+  .section-heading { align-items: flex-start; gap: 12px; margin-top: 30px; }
+  .section-heading h2 { font-size: 18px; }
+  .section-heading .text-button { margin: 0; white-space: nowrap; }
+  .table-header { gap: 10px; padding: 13px; }
+  .table-title { font-size: 11px; }
+  .filter-button { max-width: 125px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .form-panel { display: block; padding: 20px; }
+  .form-panel form { margin-top: 22px; }
+  .form-panel input, .form-panel select { width: 100%; min-width: 0; }
+  .error-banner { align-items: flex-start; flex-direction: column; gap: 10px; }
+  .reservation-card article { align-items: flex-start; flex-wrap: wrap; padding: 12px; }
+  .reservation-info { min-width: 0; flex: 1; }
+  .reservation-card time { width: 100%; margin-left: 42px; }
+  .reservation-status { margin-left: 42px; }
+  .auth-card { padding: 28px 22px; }
+  .auth-card h1 { font-size: 29px; }
+  .public-nav { padding-left: 20px; padding-right: 20px; }
+  .public-hero { padding-left: 20px; padding-right: 20px; }
+  .public-hero h1 { font-size: 40px; }
+  .dashboard-preview { min-width: 0; padding: 8px; }
+  .preview-body { padding: 15px; }
+  .preview-stats span { padding: 8px; }
+  .preview-stats b { font-size: 15px; }
+  .feature-strip, .public-footer { padding-left: 20px; padding-right: 20px; }
+}
