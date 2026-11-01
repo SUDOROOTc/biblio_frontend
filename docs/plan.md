@@ -1,148 +1,280 @@
-# Plan d'implementation du frontend Biblio
+# Plan d'implementation complet du frontend Biblio
 
 ## Objectif
 
-Construire progressivement l'interface francaise de Biblio pour les bibliothecaires,
-avec une landing page, une page de connexion et un tableau de bord de circulation.
-Chaque etape reste petite, verifiable et se termine par un commit dedie.
+Livrer un frontend React/TypeScript stable, en francais, connecte au backend
+Django existant. Chaque cycle traite un comportement utilisable, est valide
+avec les commandes disponibles et se termine par un commit dedie.
 
-## Regles de chaque etape
+## Regles de travail
 
-1. Definir le comportement ou l'ecran vise.
-2. Modifier uniquement le perimetre necessaire.
-3. Executer les validations disponibles.
-4. Expliquer les choix et les fichiers modifies.
-5. Committer avec un message clair.
+Pour chaque cycle :
 
-## Approche technique retenue pour le demarrage
+1. definir le comportement metier vise ;
+2. modifier uniquement le perimetre necessaire ;
+3. executer `npm.cmd run typecheck` et `npm.cmd run build` ;
+4. tester le parcours API si le backend concerne est disponible ;
+5. expliquer le code produit ;
+6. creer un commit Conventional Commits.
 
-Commencer avec React, TypeScript et le CSS deja presents dans le projet, sans ajouter
-de dependance. Cette approche permet de stabiliser les ecrans et le modele visuel
-avant d'introduire la stack cible prevue par `AGENTS.md`.
+Ne pas ajouter de dependance sans validation. Le frontend ne reproduit jamais
+les regles metier du backend.
 
-L'ajout de dependances comme Tailwind, daisyUI, TanStack Query, Zustand, React Hook
-Form, Zod, TanStack Router, Motion ou Phosphor devra etre valide avant installation.
+## Architecture cible legere
 
-## Etapes
+```text
+src/
+  api/
+    client.ts
+    auth.ts
+    livres.ts
+    lecteurs.ts
+    reservations.ts
+  App.tsx
+  DashboardContent.tsx
+  CataloguePage.tsx
+  MembresPage.tsx
+  ReservationsPage.tsx
+  ParametresPage.tsx
+  Icon.tsx
+  types.ts
+  styles.css
+```
 
-### Etape 1 — Socle et design system
+Le client API centralise :
 
-- Verifier la configuration Vite, TypeScript et les scripts npm.
-- Organiser les premiers composants reutilisables sans casser l'ecran existant.
-- Definir les tokens visuels Biblio : couleurs, typographies, espacements, rayons,
-  focus et statuts.
-- Ajouter les scripts de validation manquants uniquement si l'outillage existant
-  les permet sans nouvelle dependance.
+- `credentials: "include"` ;
+- le cookie CSRF et `X-CSRFToken` ;
+- les erreurs JSON `{ detail }` ;
+- les reponses `204` sans parsing JSON ;
+- les etats HTTP `401`, `403`, `404`, `409` et `422`.
+
+## Etat actuel
+
+Termine :
+
+- socle visuel et responsive ;
+- landing page ;
+- connexion JSON Django avec session et CSRF ;
+- routage `/`, `/connexion`, `/dashboard`, `/catalogue`, `/membres` ;
+- dashboard initial ;
+- catalogue connecte a `GET /api/livres/recherche` ;
+- creation et liste des lecteurs ;
+- navigation de base et deconnexion.
+
+En attente :
+
+- boutons du dashboard encore non connectes ;
+- section reservations encore en maquette ;
+- page Parametres ;
+- creation de livre ;
+- creation et actions de reservation ;
+- tests frontend et documentation finale.
+
+## Cycles d'implementation
+
+### Cycle 1 — Stabiliser les layouts authentifies
+
+Objectif : supprimer la duplication de sidebar entre Dashboard, Catalogue et
+Membres.
+
+- extraire un layout authentifie commun ;
+- rendre les liens actifs selon l'URL ;
+- brancher les boutons de navigation existants ;
+- conserver la restauration de session.
 
 Commit :
 
 ```text
-chore(front): preparer le socle frontend
+refactor(layout): mutualiser le layout authentifie
 ```
 
-### Etape 2 — Structure de navigation
+### Cycle 2 — Rendre les actions rapides du dashboard fonctionnelles
 
-- Creer la structure visuelle du layout public et du layout authentifie.
-- Ajouter la sidebar, la barre superieure et la navigation responsive.
-- Garder les routes compatibles avec la stack actuellement installee.
+Objectif : aucun bouton principal ne doit etre decoratif.
+
+- `Ajouter un livre` -> `/catalogue/nouveau` ;
+- `Ajouter un lecteur` -> `/membres` ;
+- `Creer une reservation` -> `/reservations/nouveau` ;
+- `Voir tout` du catalogue -> `/catalogue` ;
+- `Voir tout` des reservations -> `/reservations`.
 
 Commit :
 
 ```text
-feat(navigation): ajouter les layouts et la navigation
+feat(navigation): brancher les actions du dashboard
 ```
 
-### Etape 3 — Landing page
+### Cycle 3 — Formulaire de creation d'un livre
 
-- Construire le hero, la proposition de valeur et les trois piliers metier.
-- Ajouter les appels a l'action vers la connexion.
-- Ajouter le footer et les variantes responsive.
+Objectif : creer un livre depuis le frontend avec `POST /api/livres`.
+
+- champs titre, auteur, annee de publication ;
+- validation de forme ;
+- etats chargement, succes et erreur ;
+- retour vers le catalogue apres creation ;
+- rafraichissement du catalogue.
+
+Le frontend ne decide pas si le livre est valide metier : il affiche l'erreur
+renvoyee par le backend.
 
 Commit :
 
 ```text
-feat(landing): creer la page d'accueil Biblio
+feat(catalogue): ajouter la creation de livres
 ```
 
-### Etape 4 — Page de connexion
+### Cycle 4 — Page complete des reservations
 
-- Construire le formulaire identifiant / mot de passe.
-- Prevoir les etats standard, chargement et erreur.
-- Ajouter l'affichage ou le masquage du mot de passe.
-- Ne pas modifier le contrat API backend.
+Objectif : remplacer la maquette par `GET /api/reservations`.
+
+- type `Reservation` aligne sur le contrat ;
+- liste des reservations ;
+- badge unique pour les cinq statuts ;
+- affichage livre, lecteur, statut et dates ;
+- etats chargement, vide, erreur et reprise ;
+- recherche ou filtre local uniquement pour l'affichage.
 
 Commit :
 
 ```text
-feat(auth): creer la page de connexion bibliothecaire
+feat(reservations): afficher les reservations
 ```
 
-### Etape 5 — Tableau de bord
+### Cycle 5 — Creation d'une reservation
 
-- Construire les KPI, la recherche universelle, les actions rapides,
-  les reservations recentes et les arrivages.
-- Utiliser des donnees explicitement marquees comme maquette tant que l'API
-  correspondante n'est pas connectee.
-- Gerer les etats chargement, vide, erreur et succes.
+Objectif : creer une reservation avec `POST /api/reservations`.
+
+- choix d'un livre ;
+- choix d'un lecteur ;
+- validation des UUID ;
+- affichage des erreurs `404`, `409` et `422` ;
+- retour a la liste apres succes.
+
+Les quotas et la disponibilite restent exclusivement geres par le backend.
 
 Commit :
 
 ```text
-feat(dashboard): creer le tableau de bord bibliothecaire
+feat(reservations): ajouter la creation
 ```
 
-### Etape 6 — Etats metier et composants partages
+### Cycle 6 — Actions de circulation
 
-- Centraliser les cinq statuts de reservation.
-- Creer un composant unique de badge de statut.
-- Ajouter les confirmations, messages de succes et messages d'erreur.
-- Respecter les contraintes d'accessibilite et de contraste.
+Objectif : rendre utilisables les transitions de reservation.
+
+- annuler : `POST /annuler` ;
+- emprunter : `POST /emprunter` ;
+- retourner : `POST /retourner` ;
+- confirmation avant action ;
+- etat d'action en cours ;
+- message de succes ;
+- rafraichissement apres action ;
+- blocage visuel des actions impossibles selon le statut recu.
+
+Le frontend ne remplace pas la validation du backend : une erreur de transition
+est toujours affichee.
 
 Commit :
 
 ```text
-feat(ui): ajouter les composants metier reutilisables
+feat(reservations): ajouter les actions de circulation
 ```
 
-### Etape 7 — Connexion au contrat API
+### Cycle 7 — Dashboard branche sur les donnees reelles
 
-- Lire et respecter `api.md`.
-- Connecter progressivement la recherche de livres, les reservations et
-  l'authentification.
-- Traduire les erreurs HTTP en messages francais exploitables.
-- Ne pas dupliquer les regles metier du backend.
+Objectif : supprimer les donnees de reservation fictives du dashboard.
+
+- charger `GET /api/reservations` ;
+- afficher les reservations recentes reelles ;
+- afficher le nombre d'emprunts en cours derive des reservations recues ;
+- afficher les membres actifs uniquement si le backend fournit la donnee ;
+- garder `—` pour une statistique indisponible ;
+- ne pas appeler `EXPIREE` un retard de retour sans contrat explicite.
+
+Decision actuelle pour `Retards` : afficher `—` tant que le backend ne definit
+pas une vraie statistique de retard. `EXPIREE` signifie reservation non retiree
+a temps, pas necessairement retour en retard.
 
 Commit :
 
 ```text
-feat(api): connecter le frontend au contrat backend
+feat(dashboard): connecter les reservations reelles
 ```
 
-### Etape 8 — Formulaires et actions de circulation
+### Cycle 8 — Page Parametres
 
-- Ajouter les formulaires livre, lecteur et reservation.
-- Ajouter annulation, emprunt et retour.
-- Afficher les validations, confirmations et retours d'action.
+Objectif : remplacer le lien decoratif Parametres.
+
+- afficher l'utilisateur courant ;
+- formulaire de changement de mot de passe ;
+- appel `POST /api/auth/changer-mot-de-passe` ;
+- validation de forme ;
+- messages de succes et d'erreur ;
+- conserver la deconnexion deja fonctionnelle.
 
 Commit :
 
 ```text
-feat(circulation): ajouter les actions de gestion
+feat(parametres): ajouter la gestion du compte
 ```
 
-### Etape 9 — Tests et stabilisation
+### Cycle 9 — Finaliser Membres
 
-- Tester les composants principaux et les parcours critiques.
-- Verifier les etats d'erreur, chargement et vide.
-- Verifier clavier, focus, responsive et contraste.
-- Executer :
+Objectif : completer la page lecteurs avec les operations disponibles.
 
-```powershell
-npm run lint
-npm run typecheck
-npm run test
-npm run build
+- modifier un lecteur avec `PUT /api/lecteurs/{id}` ;
+- suppression logique avec `DELETE /api/lecteurs/{id}` ;
+- confirmation avant suppression ;
+- rafraichissement apres modification ou suppression ;
+- consultation des reservations d'un lecteur avec
+  `GET /api/lecteurs/{id}/reservations`.
+
+Commit :
+
+```text
+feat(membres): ajouter la gestion des lecteurs
 ```
+
+### Cycle 10 — Etats, accessibilite et erreurs
+
+Objectif : rendre chaque ecran robuste.
+
+- chargement explicite ;
+- etat vide utile ;
+- erreur avec reprise ;
+- `aria-live` pour erreurs et confirmations ;
+- focus visible ;
+- boutons clavier accessibles ;
+- pas de couleur seule pour les statuts ;
+- messages francais pour `401`, `403`, `404`, `409` et `422`.
+
+Commit :
+
+```text
+fix(ui): renforcer les etats et l accessibilite
+```
+
+### Cycle 11 — Tests frontend
+
+Objectif : proteger les parcours critiques.
+
+Les dependances de test ne seront ajoutees qu'apres validation. Si aucun outil
+n'est autorise, executer au minimum les validations TypeScript, build et les
+tests API manuels reproductibles.
+
+Parcours a couvrir :
+
+- landing -> connexion ;
+- login valide et invalide ;
+- restauration de session ;
+- logout ;
+- catalogue et recherche ;
+- creation d'un livre ;
+- creation d'un lecteur ;
+- liste et creation d'une reservation ;
+- actions annuler, emprunter et retourner ;
+- etats vides et erreurs.
 
 Commit :
 
@@ -150,15 +282,44 @@ Commit :
 test(front): couvrir les parcours principaux
 ```
 
-### Etape 10 — Documentation finale
+### Cycle 12 — Documentation et livraison
 
-- Documenter le lancement et les variables d'environnement.
-- Documenter l'utilisation de `api.md`.
-- Verifier que l'historique reste lisible et qu'aucun fichier sensible
-  ou genere n'est commite.
+Objectif : rendre le projet installable et compréhensible.
+
+- mettre a jour le README frontend ;
+- documenter `VITE_API_URL` et `VITE_USE_DEMO` ;
+- documenter le proxy Vite ;
+- documenter les routes frontend ;
+- verifier les fichiers sensibles et generes ;
+- ne pas committer automatiquement les fichiers initiaux sans les examiner.
+
+Validations finales :
+
+```powershell
+npm.cmd run typecheck
+npm.cmd run build
+```
+
+Si les scripts existent a ce moment-la :
+
+```powershell
+npm.cmd run lint
+npm.cmd run test
+```
 
 Commit :
 
 ```text
-docs(front): documenter le frontend Biblio
+docs(front): finaliser la documentation
 ```
+
+## Dependances et limites backend
+
+- `GET /api/lecteurs` est maintenant disponible et utilise par Membres.
+- `GET /api/reservations` est disponible.
+- `POST /api/livres`, `POST /api/lecteurs` et `POST /api/reservations` sont disponibles.
+- Les actions de reservation sont disponibles dans le contrat.
+- La route backend `/retourner` doit etre verifiee avant d'utiliser l'action en production.
+- Aucun endpoint statistiques stable n'est documente : ne pas inventer de chiffres.
+- Le backend reste responsable des regles metier, permissions, sessions, CSRF,
+  conflits et transitions.
