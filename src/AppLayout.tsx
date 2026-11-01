@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Icon } from './Icon'
 import type { Screen, UtilisateurConnecte } from './types'
 
@@ -11,7 +11,15 @@ type Props = {
 }
 
 export function AppLayout({ screen, utilisateur, navigate, onLogout, children }: Props) {
+  const [theme, setTheme] = useState<'clair' | 'sombre'>(() => {
+    const savedTheme = window.localStorage.getItem('biblio-theme')
+    return savedTheme === 'clair' ? 'clair' : 'sombre'
+  })
   const initials = utilisateur?.username.slice(0, 2).toUpperCase() ?? 'OU'
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    window.localStorage.setItem('biblio-theme', theme)
+  }, [theme])
   const link = (target: Screen, label: string, icon: 'grid' | 'book' | 'users' | 'settings') => (
     <a className={`nav-item ${screen === target || (target === 'catalogue' && screen === 'catalogue-nouveau') || (target === 'reservations' && screen === 'reservations-nouveau') ? 'active' : ''}`} href={`/${target}`} onClick={(event) => { event.preventDefault(); navigate(target) }}>
       <Icon name={icon} /> {label}
@@ -31,6 +39,10 @@ export function AppLayout({ screen, utilisateur, navigate, onLogout, children }:
         </nav>
         <div className="menu-label menu-label-bottom">CONFIGURATION</div>
         <nav>{link('parametres', 'Paramètres', 'settings')}</nav>
+        <button className="theme-toggle" onClick={() => setTheme(theme === 'sombre' ? 'clair' : 'sombre')} aria-label={`Activer le thème ${theme === 'sombre' ? 'clair' : 'sombre'}`}>
+          <span className="theme-toggle-icon">{theme === 'sombre' ? '☼' : '◐'}</span>
+          <span>Thème {theme === 'sombre' ? 'sombre' : 'clair'}</span>
+        </button>
         <div className="sidebar-footer">
           <div className="profile"><div className="avatar">{initials}</div><div><strong>{utilisateur?.username ?? 'Ouedraogo'}</strong><small>{utilisateur?.role ?? 'Bibliothécaire'}</small></div></div>
           <button className="text-button" onClick={onLogout}>Se déconnecter</button>
