@@ -19,6 +19,22 @@ function traduireErreurValidation(message: string): string {
   return traductions[message] ?? message
 }
 
+function messagePourStatut(status: number): string {
+  const messages: Record<number, string> = {
+    400: 'La demande est invalide. Vérifiez les informations saisies.',
+    401: 'Votre session n’est plus active. Reconnectez-vous.',
+    403: 'Cette action n’est pas autorisée ou la protection de sécurité a expiré.',
+    404: 'La ressource demandée est introuvable.',
+    409: 'Cette action entre en conflit avec l’état actuel de la bibliothèque.',
+    422: 'Les informations saisies ne peuvent pas être acceptées.',
+    500: 'Le serveur rencontre un problème. Réessayez dans quelques instants.',
+    502: 'Le serveur est momentanément indisponible.',
+    503: 'Le service est momentanément indisponible.',
+    504: 'Le serveur met trop de temps à répondre.',
+  }
+  return messages[status] ?? 'Une erreur est survenue. Réessayez dans quelques instants.'
+}
+
 function lireCookie(nom: string): string | null {
   const cookie = document.cookie.split('; ').find((valeur) => valeur.startsWith(`${nom}=`))
   return cookie ? decodeURIComponent(cookie.substring(nom.length + 1)) : null
@@ -28,12 +44,17 @@ async function obtenirTokenCsrf(): Promise<string> {
   let token = lireCookie('csrftoken')
   if (token) return token
 
-  const response = await fetch(`${API_URL}/api/auth/csrf`, {
-    credentials: 'include',
-    headers: { Accept: 'application/json' },
-  })
+  let response: Response
+  try {
+    response = await fetch(`${API_URL}/api/auth/csrf`, {
+      credentials: 'include',
+      headers: { Accept: 'application/json' },
+    })
+  } catch {
+    throw new ErreurApi('Connexion au serveur impossible. Vérifiez que le backend est démarré.', 0)
+  }
   if (!response.ok) {
-    throw new ErreurApi('Impossible d’initialiser la protection CSRF.', response.status)
+    throw new ErreurApi(messagePourStatut(response.status), response.status)
   }
 
   token = lireCookie('csrftoken')
@@ -52,14 +73,19 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
     headers.set('X-CSRFToken', await obtenirTokenCsrf())
   }
 
-  const response = await fetch(`${API_URL}${path}`, {
-    ...init,
-    credentials: 'include',
-    headers,
-  })
+  let response: Response
+  try {
+    response = await fetch(`${API_URL}${path}`, {
+      ...init,
+      credentials: 'include',
+      headers,
+    })
+  } catch {
+    throw new ErreurApi('Connexion au serveur impossible. Vérifiez que le backend est démarré.', 0)
+  }
 
   if (!response.ok) {
-    let message = `La requête a échoué (${response.status})`
+    let message = messagePourStatut(response.status)
     const contentType = response.headers.get('content-type') ?? ''
     if (contentType.includes('application/json')) {
       const body = await response.json() as Record<string, unknown>
