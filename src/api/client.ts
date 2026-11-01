@@ -53,8 +53,13 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
     let message = `La requête a échoué (${response.status})`
     const contentType = response.headers.get('content-type') ?? ''
     if (contentType.includes('application/json')) {
-      const body = await response.json() as { detail?: string }
-      if (body.detail) message = body.detail
+      const body = await response.json() as Record<string, unknown>
+      if (typeof body.detail === 'string') {
+        message = body.detail
+      } else {
+        const validationMessages = Object.values(body).flatMap((value) => Array.isArray(value) ? value : [value]).filter((value): value is string => typeof value === 'string')
+        if (validationMessages.length > 0) message = validationMessages.join(' ')
+      }
     }
     throw new ErreurApi(message, response.status)
   }
