@@ -1,12 +1,36 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { connecter } from './api/auth'
 import { DashboardContent } from './DashboardContent'
 import { Icon } from './Icon'
 
+type Screen = 'dashboard' | 'landing' | 'login'
+
+function screenFromPath(pathname: string): Screen {
+  if (pathname === '/connexion') return 'login'
+  if (pathname === '/dashboard') return 'dashboard'
+  return 'landing'
+}
+
 function App() {
-  const [screen, setScreen] = useState<'dashboard' | 'landing' | 'login'>('dashboard')
+  const [screen, setScreen] = useState<Screen>(() => screenFromPath(window.location.pathname))
   const [loginLoading, setLoginLoading] = useState(false)
   const [loginError, setLoginError] = useState('')
+
+  useEffect(() => {
+    const handlePopState = () => setScreen(screenFromPath(window.location.pathname))
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
+
+  const navigate = (nextScreen: Screen) => {
+    const pathByScreen: Record<Screen, string> = {
+      landing: '/',
+      login: '/connexion',
+      dashboard: '/dashboard',
+    }
+    window.history.pushState({}, '', pathByScreen[nextScreen])
+    setScreen(nextScreen)
+  }
 
   const handleLogin = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -22,7 +46,7 @@ function App() {
 
     setLoginLoading(true)
     void connecter(username, password).then(() => {
-      setScreen('dashboard')
+      navigate('dashboard')
     }).catch((requestError: unknown) => {
       setLoginError(requestError instanceof Error ? requestError.message : 'La connexion a échoué.')
     }).finally(() => {
@@ -34,10 +58,10 @@ function App() {
     return (
       <main className="public-shell">
         <nav className="public-nav">
-          <a className="brand" href="#accueil" onClick={() => setScreen('landing')}><span className="brand-mark">B</span><span>Biblio</span></a>
+          <a className="brand" href="/" onClick={(event) => { event.preventDefault(); navigate('landing') }}><span className="brand-mark">B</span><span>Biblio</span></a>
           <div className="public-links">
             <a href="#fonctionnalites">Découvrir</a>
-            <button className="text-button" onClick={() => setScreen('login')}>Se connecter</button>
+            <button className="text-button" onClick={() => navigate('login')}>Se connecter</button>
           </div>
         </nav>
         <section className="public-hero product-hero" id="accueil">
@@ -46,7 +70,7 @@ function App() {
             <h1>Une bibliothèque plus fluide, <em>à chaque journée.</em></h1>
             <p className="subtitle">Biblio rassemble votre catalogue, vos adhérents et vos réservations dans un espace calme, lisible et pensé pour le comptoir.</p>
             <div className="hero-actions">
-              <button className="primary-button" onClick={() => setScreen('login')}>Accéder à mon espace <Icon name="arrow" /></button>
+              <button className="primary-button" onClick={() => navigate('login')}>Accéder à mon espace <Icon name="arrow" /></button>
               <a className="secondary-link" href="#fonctionnalites">Voir comment ça marche</a>
             </div>
           </div>
@@ -73,7 +97,7 @@ function App() {
   if (screen === 'login') {
     return (
       <main className="auth-shell">
-        <a className="brand auth-brand" href="#accueil" onClick={() => setScreen('landing')}><span className="brand-mark">B</span><span>Biblio</span></a>
+        <a className="brand auth-brand" href="/" onClick={(event) => { event.preventDefault(); navigate('landing') }}><span className="brand-mark">B</span><span>Biblio</span></a>
         <section className="auth-card">
           <p className="eyebrow">ESPACE BIBLIOTHÉCAIRE</p>
           <h1>Bienvenue dans votre bibliothèque.</h1>
@@ -86,7 +110,7 @@ function App() {
             <input id="password" name="password" type="password" autoComplete="current-password" required />
             <button className="primary-button auth-submit" type="submit" disabled={loginLoading}>{loginLoading ? 'Connexion en cours…' : 'Se connecter'}</button>
           </form>
-          <button className="text-button" onClick={() => setScreen('landing')}>Retour à l’accueil</button>
+          <button className="text-button" onClick={() => navigate('landing')}>Retour à l’accueil</button>
         </section>
       </main>
     )
@@ -98,7 +122,7 @@ function App() {
         <div className="brand"><span className="brand-mark">B</span><span>Biblio</span></div>
         <div className="menu-label">MENU PRINCIPAL</div>
         <nav>
-          <a className="nav-item active" href="#dashboard" onClick={() => setScreen('dashboard')}><Icon name="grid" /> Tableau de bord</a>
+          <a className="nav-item active" href="/dashboard" onClick={(event) => { event.preventDefault(); navigate('dashboard') }}><Icon name="grid" /> Tableau de bord</a>
           <a className="nav-item" href="#books"><Icon name="book" /> Catalogue <span className="nav-count">1 248</span></a>
           <a className="nav-item" href="#members"><Icon name="users" /> Membres</a>
         </nav>
