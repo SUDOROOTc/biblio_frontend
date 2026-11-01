@@ -1,10 +1,6 @@
 export const API_URL = import.meta.env.VITE_API_URL?.replace(/\/$/, '') ?? ''
 
 export async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  if (!API_URL) {
-    throw new Error('API non configurée')
-  }
-
   const response = await fetch(`${API_URL}${path}`, {
     ...init,
     credentials: 'include',

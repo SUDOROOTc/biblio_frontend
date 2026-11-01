@@ -6,10 +6,6 @@ function lireCookie(nom: string): string | null {
 }
 
 export async function connecter(username: string, password: string): Promise<void> {
-  if (!API_URL) {
-    throw new Error('API non configurée')
-  }
-
   await fetch(`${API_URL}/api/auth/login/`, {
     credentials: 'include',
   })
